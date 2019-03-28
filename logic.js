@@ -21,7 +21,7 @@ function createFeatures(earthquakeData) {
   // Run the onEachFeature function once for each piece of data in the array
 
   var earthquakes = L.layerGroup();
-  createMap(earthquakes);
+  createMap(earthquakes, boundaries);
   function chooseColor(val){
     switch(Math.floor(val)){
       case 0:
@@ -71,7 +71,23 @@ function createFeatures(earthquakeData) {
 
 };
 
-function createMap(earthquakes) {
+
+// Adding boundary layer to map
+var queryUrl_boundary = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
+var boundaries = L.layerGroup();
+// Perform a GET request to the query URL
+d3.json(queryUrl_boundary, function(data) {
+  // Once we get a response, send the data.features object to the createFeatures function
+  L.geoJson(data, {
+    style: {
+      color: "orange",
+    }
+  }).addTo(boundaries);
+});
+
+
+
+function createMap(earthquakes, boundaries) {
 
   // Define streetmap and darkmap layers
   var streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
@@ -96,7 +112,8 @@ function createMap(earthquakes) {
 
   // Create overlay object to hold our overlay layer
   var overlayMaps = {
-    Earthquakes: earthquakes
+    Earthquakes: earthquakes,
+    FaultLines: boundaries
 
   };
 
@@ -106,7 +123,7 @@ function createMap(earthquakes) {
       37.09, -95.71
     ],
     zoom: 4.5,
-    layers: [streetmap, earthquakes]
+    layers: [streetmap, earthquakes, boundaries]
   });
 
   // Create a layer control
@@ -134,5 +151,34 @@ function createMap(earthquakes) {
 
   // Adding legend to the map
   legend.addTo(myMap);
+
+  // // Adding boundary layer to map
+  // var queryUrl_boundary = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
+  // // Perform a GET request to the query URL
+  // d3.json(queryUrl_boundary, function(data) {
+  //   // Once we get a response, send the data.features object to the createFeatures function
+  //   L.geoJson(data, {
+  //     style: {
+  //       color: "orange",
+  //     }
+  //   }).addTo(myMap);
+  // });
+
 }
 
+// // Our style object
+// var mapStyle = {
+//   color: "white",
+//   fillColor: "yellow",
+//   fillOpacity: 0.5,
+//   weight: 1.5
+// };
+
+// // Grabbing our GeoJSON data..
+// d3.json(link, function(data) {
+//   // Creating a geoJSON layer with the retrieved data
+//   L.geoJson(data, {
+//     // Passing in our style object
+//     style: mapStyle
+//   }).addTo(map);
+// });
